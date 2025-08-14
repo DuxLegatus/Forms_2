@@ -1,0 +1,23 @@
+body {
+    background: whitesmoke;
+    font-family: Arial, sans-serif;
+}
+
+h1 {
+    text-align: center;
+    color: #222;
+}
+
+table {
+    margin: 30px auto;
+    border-collapse: collapse;
+    width: 70%;
+    background: white;
+    border: 1px solid gainsboro;
+}
+
+td {
+    border: 1px solid gainsboro;
+    padding: 10px;
+    text-align: center;
+}

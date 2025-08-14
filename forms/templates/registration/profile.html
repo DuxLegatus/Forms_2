@@ -1,11 +1,33 @@
+{% load static %}
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/profile.css' %}">
 </head>
 <body>
-    welcome {{user_obj.username}}
+    <div>
+        <h1>PROFILE INFORMATION</h1>
+        <form method="POST" enctype="multipart/form-data"> 
+            <!-- gpts cavugde da enctype="multipart/form-data" es kodi aklda da magitom ar anaxlebda surats -->
+            {% csrf_token %}
+            <h3>Account information</h3>
+            {{ u_form.as_p }}
+
+            <h3>PROFILE INFORMATION</h3>
+            {{ p_form.as_p }}
+            <button type = 'submit'>Save changes </button>
+        </form>
+
+        {% if request.user.profile.profile_picture %}
+        <img src="{{ request.user.profile.profile_picture.url }}" width="150" alt="profile picture">
+        {% else %}
+        <img src="/media/profile_pics/default.jpg" width="150" alt="profile">
+        {% endif %}
+    </div>
+
+    
 </body>
 </html>

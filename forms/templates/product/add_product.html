@@ -1,18 +1,23 @@
+{% load static %}
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Document</title>
+    <link rel="stylesheet" href="{% static 'css/add_product.css' %}">
 </head>
 <body>
-    <h1> add product </h1>
-    <form method="post">
+    <div>
+        <h1> add product </h1>
+        <form method="post">
 
-        {% csrf_token %}
-        {{ form.as_p }}
-        <button type="submit">add product</button>
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit">add product</button>
 
-    </form>
+        </form>
+    </div>
 </body>
 </html>

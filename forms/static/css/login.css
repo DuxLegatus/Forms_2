@@ -1,0 +1,42 @@
+body{
+    margin: 0;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    background-color: aliceblue;
+
+}
+
+form{
+    background-color: rgb(198, 243, 241);
+    border-radius: 10px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+    width: 300px;
+    height: 200px;
+}
+form button{
+    border: solid black 1px;
+    border-radius: 5px;
+    background-color: white;
+}
+
+form button:hover{
+    background-color: black;
+    color: white;
+}
+
+form input{
+    border-radius: 5px;
+    border: none;
+}
+form input:hover{
+    border: solid black 1px
+}
+
+form:hover{
+    box-shadow: 0px 0px 2px 2px;
+}
