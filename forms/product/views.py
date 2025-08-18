@@ -3,49 +3,84 @@ from .forms import Product_form
 from .models import Products
 from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden,HttpResponseNotAllowed
+from django.views.generic import ListView,DetailView,CreateView,UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from django.urls import reverse_lazy
+from django.db.models import Q
 
 # Create your views here.
 
-def show_products(request):
-    products = Products.objects.all()
-    return render(request,"product/all_products.html",{"products":products})
+class AllProductsView(ListView):
+    model = Products
+    template_name = "product/all_products.html"
+    context_object_name = "products"
+    paginate_by = 2
 
-def show_specific_products(request,pk):
-    product = get_object_or_404(Products,pk=pk)
-    return render(request,"product/product_detail.html",{"product":product})
+    def get_queryset(self):
+        queryset = super().get_queryset()
+
+        query = self.request.GET.get('q')
+        category = self.request.GET.get('category')
+        min_price = self.request.GET.get('min_price')
+        max_price = self.request.GET.get('max_price')
+
+        if query:
+            queryset = queryset.filter(Q(product_name__icontains=query))
+
+        if category:
+            queryset = queryset.filter(category__name=category)
+
+        if min_price:
+            queryset = queryset.filter(price__gte=min_price)
+
+        if max_price:
+            queryset = queryset.filter(price__lte=max_price)
+
+        return queryset
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        query_params = self.request.GET.copy()
+        if "page" in query_params:   
+            query_params.pop("page")
+        context["query_params"] = query_params.urlencode()
+        return context
+    
+
+class SpecificProductView(DetailView):
+    model = Products
+    template_name = "product/product_detail.html"
+    context_object_name = "product"
 
 
-
-@login_required
-def add_product(request):
-    if request.method == "POST":
-        form = Product_form(request.POST)
-        if form.is_valid():
-            product = form.save(commit=False)
-            product.user = request.user
-            product.save()
-            return redirect("all_products")
-    else:
-        form = Product_form()
-    return render(request, 'product/add_product.html', {'form': form})
-
-@login_required
-def update_product(request,pk):
-    product = get_object_or_404(Products,pk=pk)
-    if not request.user == product.user:
-        return HttpResponseForbidden("you havent uploaded this product")
-    if request.method == "POST":
-        method = request.POST.get("_method","").upper()
-        if method == "PUT":
-            form = Product_form(request.POST, instance=product)
-            if form.is_valid():
-                form.save()
-                return redirect('all_products')
-        else:
-            return HttpResponseNotAllowed(["PUT"])
-    else:
-        form = Product_form(instance=product)
-
-    return render(request, 'product/update_product.html', {'form': form,"product":product})
+class AddProductView(LoginRequiredMixin,CreateView):
+    model = Products
+    form_class = Product_form
+    template_name = "product/add_product.html"
+    success_url = reverse_lazy('all_products')
+    def form_valid(self, form):
+        form.instance.user = self.request.user
+        return super().form_valid(form)
 
         
+class UpdateProductView(UserPassesTestMixin,LoginRequiredMixin,UpdateView):
+    model = Products
+    form_class = Product_form
+    template_name = "product/add_product.html"
+    success_url = reverse_lazy('all_products')
+    def post(self, request, *args, **kwargs):
+        method = request.POST.get('_method', '').upper()
+        if method != 'PUT':
+            return HttpResponseNotAllowed(['PUT'])
+        return super().post(request, *args, **kwargs)
+    
+    def test_func(self):
+        product = self.get_object()
+        return self.request.user == product.user
+    
+    def handle_no_permission(self):
+        if self.request.user.is_authenticated:
+            return HttpResponseForbidden('only owner can change the product')
+        return super().handle_no_permission()
+
+    def get_success_url(self):
+        return reverse_lazy('product_detail', kwargs = {'pk': self.object.pk} )
