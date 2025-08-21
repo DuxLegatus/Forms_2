@@ -10,3 +10,12 @@ class Products(models.Model):
     
     def __str__(self):
         return self.product_name
+    
+
+class ProductLog(models.Model):
+    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='logs')
+    message = models.TextField()
+    created_at = models.DateTimeField(auto_now_add=True) 
+
+    def __str__(self):
+        return f'log for {self.product.name} : {self.message[:30]}'

@@ -11,12 +11,19 @@
 <body>
     <h1>All Products</h1>
 
-    <form method="get" style="text-align:center; margin-bottom:20px;">
+    <form method="get" class="filter-form">
         <input type="text" name="q" placeholder="Search..." value="{{ request.GET.q }}">
         <input type="text" name="category" placeholder="Category" value="{{ request.GET.category }}">
         <input type="number" name="min_price" placeholder="Min Price" value="{{ request.GET.min_price }}">
         <input type="number" name="max_price" placeholder="Max Price" value="{{ request.GET.max_price }}">
-        <button type="submit">Filter</button>
+        <select name="order_by" class="order-select">
+            <option value="id" {% if request.GET.order_by == "id" %}selected{% endif %}>Default</option>
+            <option value="product_name" {% if request.GET.order_by == "product_name" %}selected{% endif %}>Name (A-Z)</option>
+            <option value="-product_name" {% if request.GET.order_by == "-product_name" %}selected{% endif %}>Name (Z-A)</option>
+            <option value="price" {% if request.GET.order_by == "price" %}selected{% endif %}>Price (Low-High)</option>
+            <option value="-price" {% if request.GET.order_by == "-price" %}selected{% endif %}>Price (High-Low)</option>
+        </select>
+        <button type="submit" class="filter-btn">Filter</button>
     </form>
 
     <table>

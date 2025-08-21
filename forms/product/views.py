@@ -5,12 +5,13 @@ from django.contrib.auth.decorators import login_required
 from django.http import HttpResponseForbidden,HttpResponseNotAllowed
 from django.views.generic import ListView,DetailView,CreateView,UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
+from .mixins import QueryParamsMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
 
 # Create your views here.
 
-class AllProductsView(ListView):
+class AllProductsView(QueryParamsMixin,ListView):
     model = Products
     template_name = "product/all_products.html"
     context_object_name = "products"
@@ -36,14 +37,12 @@ class AllProductsView(ListView):
         if max_price:
             queryset = queryset.filter(price__lte=max_price)
 
+        order_by = self.request.GET.get('order_by')  
+        if order_by in ['product_name', '-product_name', 'price', '-price', 'id', '-id']:
+            queryset = queryset.order_by(order_by)
+        else:
+            queryset = queryset.order_by('id')
         return queryset
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-        query_params = self.request.GET.copy()
-        if "page" in query_params:   
-            query_params.pop("page")
-        context["query_params"] = query_params.urlencode()
-        return context
     
 
 class SpecificProductView(DetailView):
@@ -65,7 +64,7 @@ class AddProductView(LoginRequiredMixin,CreateView):
 class UpdateProductView(UserPassesTestMixin,LoginRequiredMixin,UpdateView):
     model = Products
     form_class = Product_form
-    template_name = "product/add_product.html"
+    template_name = "product/update_product.html"
     success_url = reverse_lazy('all_products')
     def post(self, request, *args, **kwargs):
         method = request.POST.get('_method', '').upper()
