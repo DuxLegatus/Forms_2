@@ -8,6 +8,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin, UserPassesTestMixin
 from .mixins import QueryParamsMixin
 from django.urls import reverse_lazy
 from django.db.models import Q
+from django.contrib import messages
 
 # Create your views here.
 
@@ -50,6 +51,19 @@ class SpecificProductView(DetailView):
     template_name = "product/product_detail.html"
     context_object_name = "product"
 
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = self.get_object()
+        recent = self.request.session.get("recent_products",[])
+
+        if product.id not in recent:
+            recent.append(product.id)
+        
+        recent = recent[-6:]
+        self.request.session["recent_products"] = recent
+        context["recent_products"] = Products.objects.filter(id__in = recent).exclude(id = product.id)
+        return context
+
 
 class AddProductView(LoginRequiredMixin,CreateView):
     model = Products
@@ -58,7 +72,9 @@ class AddProductView(LoginRequiredMixin,CreateView):
     success_url = reverse_lazy('all_products')
     def form_valid(self, form):
         form.instance.user = self.request.user
-        return super().form_valid(form)
+        response = super().form_valid(form)
+        messages.success(self.request, f"you have added a new product {form.instance.product_name}")
+        return response
 
         
 class UpdateProductView(UserPassesTestMixin,LoginRequiredMixin,UpdateView):

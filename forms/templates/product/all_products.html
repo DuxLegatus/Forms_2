@@ -56,5 +56,15 @@
         {% endif %}
     </div>
     {% endif %}
+    {% if messages %}
+    <div class = 'messages'>
+        <ul>
+        {%for message in messages%}
+        <li class=" {{messages.tags}}">{{message}}</li>
+        {% endfor%}
+        </ul>
+
+    </div>
+    {% endif %}
 </body>
 </html>

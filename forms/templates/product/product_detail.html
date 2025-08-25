@@ -15,5 +15,22 @@
         <h1>{{product.in_stock}}</h1>
         <h1>{{product.product_desc}}</h1>
     </div>
+
+
+
+    {% if recent_products %}
+        <h2>Recently Viewed</h2>
+        <ul>
+            {% for item in recent_products %}
+                <li>
+                    <a href="{% url 'product_detail' item.id %}">
+                        {{ item.product_name }} - ${{ item.price }}
+                    </a>
+                </li>
+            {% endfor %}
+        </ul>
+    {% endif %}
+
+
 </body>
 </html>
